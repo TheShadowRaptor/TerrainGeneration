@@ -315,7 +315,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 10
   depth: 10
-  height: 10
+  amp: 5
+  freq: 0.1
+  waterLevel: 0
+  waterMaterial: {fileID: 2100000, guid: 5d52eab666fcd8e46a340a36bb9a2e72, type: 2}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

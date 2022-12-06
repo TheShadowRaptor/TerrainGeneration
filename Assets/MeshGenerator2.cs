@@ -6,10 +6,20 @@ public class MeshGenerator2 : MonoBehaviour
 {
     public int width = 10;
     public int depth = 10;
-    public int height = 10;
+
+    public float amp = 5.0f;
+    public float freq = 5.0f;
+
+    public int waterLevel = 2;
+    public Material waterMaterial;
+
+    float offSetX;
+    float offSetZ;
+
+    float maxOffsetNumber = 10;
 
     Mesh mesh;
-
+    GameObject water;
     Vector3[] vertices;
     int[] triangles;
 
@@ -18,30 +28,48 @@ public class MeshGenerator2 : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
-
-        StartCoroutine(CreateMesh());
-
+        CreateMesh();
+        CreateWater();
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            CreateMesh();
+            CreateWater();
+        }
         UpdateMesh();
     }
-    IEnumerator CreateMesh()
+    void CreateMesh()
     {
         //---------------------------------------------------------
         // Create Vertices
         //---------------------------------------------------------
+
         int i = 0;
+        float y = 0;
         vertices = new Vector3[(width + 1) * (depth + 1)];
+
+        // Takes Value x and y and adds random offsets to them
+        //----------------------------------------------------
+        offSetX = Random.Range(0, maxOffsetNumber);
+        offSetZ = Random.Range(0, maxOffsetNumber);
+        //----------------------------------------------------
+
         for (int z = 0; z <= depth; z++)
         {
             for (int x = 0; x <= width; x++)
             {
-                vertices[i] = new Vector3(x, 0, z);
-                i++;   
+                y = PerlinNoise2D(((float)x * freq) + offSetX, ((float)z * freq) + offSetZ) * amp; 
+                
+                vertices[i] = new Vector3(x, y, z);
+                i++;
+                
             }
         }
+
+        
 
         //---------------------------------------------------------
         // Create Triangles
@@ -70,7 +98,7 @@ public class MeshGenerator2 : MonoBehaviour
 
                 num++;
                 vertice += 6;
-                yield return new WaitForSeconds(0.1f);
+                //yield return new WaitForSeconds(0.1f);
             }
             num++;
         }
@@ -86,9 +114,46 @@ public class MeshGenerator2 : MonoBehaviour
         mesh.RecalculateNormals();
     }
 
-    void SmoothHeight()
+    void CreateWater()
     {
+        if (water == null)
+        {
+            water = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        }
 
+        // Center water 
+        Vector3 pos = water.transform.position;
+
+        //Center depending on map size
+        pos.x = width / 2;
+        pos.z = depth / 2;
+
+        pos.y = waterLevel;
+
+        water.transform.position = pos;
+
+        // Scale water
+        Vector3 scale = water.transform.localScale;
+
+        scale.x = width / 7.0f - 0.3f;
+        scale.z = depth / 7.0f - 0.3f; 
+
+        water.transform.localScale = scale;
+
+        // Give material to plane
+        Material mat = water.GetComponent<MeshRenderer>().material = waterMaterial;
+        Color color = mat.color;
+    }
+
+    float PerlinNoise2D(float x, float y)
+    {
+        // 0.0..1.0
+        // *2
+        // 0.0..2.0
+        // -1
+        // -1.0..1.0
+
+        return Mathf.PerlinNoise(x, y) * 2.0f - 1.0f;
     }
 
     private void OnDrawGizmos()
