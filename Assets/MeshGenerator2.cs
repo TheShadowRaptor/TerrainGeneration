@@ -36,9 +36,16 @@ public class MeshGenerator2 : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            CreateMesh();
+            // Takes Value x and y and adds random offsets to them
+            //----------------------------------------------------
+            offSetX = Random.Range(0, maxOffsetNumber);
+            offSetZ = Random.Range(0, maxOffsetNumber);
+            //----------------------------------------------------
             CreateWater();
         }
+
+        CreateMesh();
+        MoveMesh();
         UpdateMesh();
     }
     void CreateMesh()
@@ -51,21 +58,26 @@ public class MeshGenerator2 : MonoBehaviour
         float y = 0;
         vertices = new Vector3[(width + 1) * (depth + 1)];
 
-        // Takes Value x and y and adds random offsets to them
-        //----------------------------------------------------
-        offSetX = Random.Range(0, maxOffsetNumber);
-        offSetZ = Random.Range(0, maxOffsetNumber);
-        //----------------------------------------------------
-
         for (int z = 0; z <= depth; z++)
         {
             for (int x = 0; x <= width; x++)
-            {
-                y = PerlinNoise2D(((float)x * freq) + offSetX, ((float)z * freq) + offSetZ) * amp; 
-                
+            {       
+                if (z == 0 || z == depth)
+                {
+                    y = -1;
+                }
+
+                else if (x == 0 || x == width)
+                {
+                    y = -1;
+                }
+
+                else
+                {
+                    y = PerlinNoise2D(((float)x * freq) + offSetX, ((float)z * freq) + offSetZ) * amp; 
+                }
                 vertices[i] = new Vector3(x, y, z);
                 i++;
-                
             }
         }
 
@@ -135,8 +147,8 @@ public class MeshGenerator2 : MonoBehaviour
         // Scale water
         Vector3 scale = water.transform.localScale;
 
-        scale.x = width / 7.0f - 0.3f;
-        scale.z = depth / 7.0f - 0.3f; 
+        scale.x = width / 10.0f;
+        scale.z = depth / 10.0f; 
 
         water.transform.localScale = scale;
 
@@ -154,6 +166,29 @@ public class MeshGenerator2 : MonoBehaviour
         // -1.0..1.0
 
         return Mathf.PerlinNoise(x, y) * 2.0f - 1.0f;
+    }
+
+    void MoveMesh()
+    {
+        if (Input.GetKey(KeyCode.W))
+        {
+            offSetZ += 0.1f;
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            offSetZ += -0.1f;
+        }
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            offSetX += -0.1f;
+        }
+
+        if (Input.GetKey(KeyCode.D))
+        {
+            offSetX += 0.1f;
+        }
     }
 
     private void OnDrawGizmos()
