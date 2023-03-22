@@ -11,12 +11,30 @@ public class MeshGenerator2 : MonoBehaviour
     public float freq = 5.0f;
 
     public int waterLevel = 2;
+
     public Material waterMaterial;
+    public Material sandMaterial;
+    public Material metalMaterial;
+    public Material grassMaterial;
+    public Material chosenMaterial;
+
+    public GameObject takeControlOn;
+    public GameObject takeControlOff;
+    public GameObject sandMaterialOn;
+    public GameObject sandMaterialOff;
+    public GameObject metalMaterialOn;
+    public GameObject metalMaterialOff;
+    public GameObject grassMaterialOn;
+    public GameObject grassMaterialOff;
+
+    public float maxOffsetNumber = 10;
+
+    public float scrollSpeed = 0.1f;
+
+    public bool takeMovementControl = false;
 
     float offSetX;
     float offSetZ;
-
-    float maxOffsetNumber = 10;
 
     Mesh mesh;
     GameObject water;
@@ -28,26 +46,19 @@ public class MeshGenerator2 : MonoBehaviour
     {
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshRenderer>().material = chosenMaterial;
         CreateMesh();
         CreateWater();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // Takes Value x and y and adds random offsets to them
-            //----------------------------------------------------
-            offSetX = Random.Range(0, maxOffsetNumber);
-            offSetZ = Random.Range(0, maxOffsetNumber);
-            //----------------------------------------------------
-            CreateWater();
-        }
-
         CreateMesh();
         MoveMesh();
         UpdateMesh();
     }
+
+
     void CreateMesh()
     {
         //---------------------------------------------------------
@@ -61,7 +72,7 @@ public class MeshGenerator2 : MonoBehaviour
         for (int z = 0; z <= depth; z++)
         {
             for (int x = 0; x <= width; x++)
-            {       
+            {
                 if (z == 0 || z == depth)
                 {
                     y = -1;
@@ -74,14 +85,14 @@ public class MeshGenerator2 : MonoBehaviour
 
                 else
                 {
-                    y = PerlinNoise2D(((float)x * freq) + offSetX, ((float)z * freq) + offSetZ) * amp; 
+                    y = PerlinNoise2D(((float)x * freq) + offSetX, ((float)z * freq) + offSetZ) * amp;
                 }
                 vertices[i] = new Vector3(x, y, z);
                 i++;
             }
         }
 
-        
+
 
         //---------------------------------------------------------
         // Create Triangles
@@ -148,7 +159,7 @@ public class MeshGenerator2 : MonoBehaviour
         Vector3 scale = water.transform.localScale;
 
         scale.x = width / 10.0f;
-        scale.z = depth / 10.0f; 
+        scale.z = depth / 10.0f;
 
         water.transform.localScale = scale;
 
@@ -170,25 +181,34 @@ public class MeshGenerator2 : MonoBehaviour
 
     void MoveMesh()
     {
-        if (Input.GetKey(KeyCode.W))
+        if (takeMovementControl)
         {
-            offSetZ += 0.1f;
-        }
+            if (Input.GetKey(KeyCode.W))
+            {
+                offSetZ += scrollSpeed;
+            }
 
-        if (Input.GetKey(KeyCode.S))
-        {
-            offSetZ += -0.1f;
-        }
+            if (Input.GetKey(KeyCode.S))
+            {
+                offSetZ += -scrollSpeed;
+            }
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            offSetX += -0.1f;
-        }
+            if (Input.GetKey(KeyCode.A))
+            {
+                offSetX += -scrollSpeed;
+            }
 
-        if (Input.GetKey(KeyCode.D))
-        {
-            offSetX += 0.1f;
+            if (Input.GetKey(KeyCode.D))
+            {
+                offSetX += scrollSpeed;
+            }
         }
+        else AutoScrollMesh();
+    }
+
+    void AutoScrollMesh()
+    {
+        offSetX += scrollSpeed * Time.deltaTime;
     }
 
     private void OnDrawGizmos()
@@ -196,7 +216,81 @@ public class MeshGenerator2 : MonoBehaviour
         if (vertices == null) return;
         for (int i = 0; i < vertices.Length; i++)
         {
-            Gizmos.DrawSphere(vertices[i],0.1f);
+            Gizmos.DrawSphere(vertices[i], 0.1f);
         }
+    }
+
+    // UI 
+    public void NewRandomTerrainButton()
+    {
+        // Takes Value x and y and adds random offsets to them
+        //----------------------------------------------------
+        offSetX = Random.Range(0, maxOffsetNumber);
+        offSetZ = Random.Range(0, maxOffsetNumber);
+        //----------------------------------------------------
+        CreateWater();
+        GetComponent<MeshRenderer>().material = chosenMaterial;
+    }
+
+    public void TakeControlToggleButton()
+    {
+        if (takeMovementControl)
+        {
+            takeMovementControl = false;
+            takeControlOn.SetActive(false);
+            takeControlOff.SetActive(true);
+        }
+        else
+        {
+            takeMovementControl = true;
+            takeControlOn.SetActive(true);
+            takeControlOff.SetActive(false);
+        }
+    }
+
+    public void PickMaterialSandButton()
+    {
+        chosenMaterial = sandMaterial;
+        sandMaterialOn.SetActive(true);
+        metalMaterialOn.SetActive(false);
+        grassMaterialOn.SetActive(false);
+        //--------------------------------------
+        sandMaterialOff.SetActive(false);
+        metalMaterialOff.SetActive(true);
+        grassMaterialOff.SetActive(true);
+    }
+
+    public void PickMaterialMetalButton()
+    {
+        chosenMaterial = metalMaterial;
+        sandMaterialOn.SetActive(false);
+        metalMaterialOn.SetActive(true);
+        grassMaterialOn.SetActive(false);
+        //--------------------------------------
+        sandMaterialOff.SetActive(true);
+        metalMaterialOff.SetActive(false);
+        grassMaterialOff.SetActive(true);
+    }
+
+    public void PickMaterialGrassButton()
+    {
+        chosenMaterial = grassMaterial;
+        sandMaterialOn.SetActive(false);
+        metalMaterialOn.SetActive(false);
+        grassMaterialOn.SetActive(true);
+        //--------------------------------------
+        sandMaterialOff.SetActive(true);
+        metalMaterialOff.SetActive(true);
+        grassMaterialOff.SetActive(false);
+    }
+
+    public void SliderInit()
+    {
+
+    }
+
+    public void SliderUpdate()
+    {
+
     }
 }
