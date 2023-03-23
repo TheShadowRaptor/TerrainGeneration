@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class MeshGenerator2 : MonoBehaviour
@@ -27,6 +29,9 @@ public class MeshGenerator2 : MonoBehaviour
     public GameObject grassMaterialOn;
     public GameObject grassMaterialOff;
 
+    public Slider ampSlider;
+    public Slider freqSlider;
+
     public float maxOffsetNumber = 10;
 
     public float scrollSpeed = 0.1f;
@@ -44,6 +49,7 @@ public class MeshGenerator2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        SliderInit();
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
         GetComponent<MeshRenderer>().material = chosenMaterial;
@@ -53,6 +59,12 @@ public class MeshGenerator2 : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown("escape"))
+        {
+            Application.Quit();
+            Debug.Log("ExitApplication");
+        }
+        SliderUpdate();
         CreateMesh();
         MoveMesh();
         UpdateMesh();
@@ -106,18 +118,18 @@ public class MeshGenerator2 : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 triangles[vertice + 0] = num + 0;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 0]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 0]);
                 triangles[vertice + 1] = num + width + 1;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 1]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 1]);
                 triangles[vertice + 2] = num + 1;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 2]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 2]);
 
                 triangles[vertice + 3] = num + 1;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 3]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 3]);
                 triangles[vertice + 4] = num + width + 1;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 4]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 4]);
                 triangles[vertice + 5] = num + width + 2;
-                Debug.Log("vertex " + num + " = " + triangles[vertice + 5]);
+                //Debug.Log("vertex " + num + " = " + triangles[vertice + 5]);
 
                 num++;
                 vertice += 6;
@@ -286,11 +298,15 @@ public class MeshGenerator2 : MonoBehaviour
 
     public void SliderInit()
     {
-
+        ampSlider.maxValue = 10.0f;
+        freqSlider.maxValue = 0.2f;
+        ampSlider.value = amp;
+        freqSlider.value = freq;
     }
 
     public void SliderUpdate()
     {
-
+        amp = ampSlider.value;
+        freq = freqSlider.value;
     }
 }
